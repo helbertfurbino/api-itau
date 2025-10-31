@@ -223,7 +223,7 @@ class Itau
         return $boletoResponse;
     }
 
-    public function consultarBoleto($agencia, $contaComDigito, $nossoNumero, $codigo_carteira)
+    public function consultarBoleto($agencia, $contaComDigito, $nossoNumero, $carteira)
     {
         $boletoResponse = new BoletoResponse();
 
