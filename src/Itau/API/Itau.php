@@ -261,4 +261,19 @@ class Itau
         
         return $baseResponse;
     }
+
+    public function consultaBoletoPix($txtId) {
+
+        $url = "https://secure.api.itau/pix_recebimentos/v2/cobv/{$txtId}";
+
+        $boletoResponse = new BoletoResponse();
+
+        $request = new Request($this);
+        $response = $request->get($this, $url);
+
+        // Add response fields
+        $boletoResponse->mapperJson($response);
+
+        return $boletoResponse;
+    }
 }
