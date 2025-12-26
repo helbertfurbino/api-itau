@@ -1,9 +1,10 @@
 <?php
+
 namespace Itau\API;
 
+use Exception;
 use Itau\API\BoleCode\BoleCode;
 use Itau\API\BoleCode\BoleCodeResponse;
-use Itau\API\Boleto\Boleto;
 use Itau\API\Boleto\BoletoResponse;
 use Itau\API\Pix\Pix;
 use Itau\API\Pix\PixResponse;
@@ -15,8 +16,7 @@ use Itau\API\Vencimento\Vencimento;
  *
  * @package Itau\API
  */
-class Itau
-{
+class Itau {
 
     private string $client_id;
     private string $client_secret;
@@ -27,8 +27,7 @@ class Itau
 
     private $debug = false;
 
-    public function __construct(string $client_id, string $client_secret, string $certificate, string $certificateKey)
-    {
+    public function __construct(string $client_id, string $client_secret, string $certificate, string $certificateKey) {
         $this->setClientId($client_id);
         $this->setClientSecret($client_secret);
         $this->setCertificate($certificate);
@@ -40,8 +39,7 @@ class Itau
      *
      * @return string
      */
-    public function getClientId()
-    {
+    public function getClientId() {
         return $this->client_id;
     }
 
@@ -49,8 +47,7 @@ class Itau
      *
      * @param string $client_id
      */
-    public function setClientId($client_id)
-    {
+    public function setClientId($client_id) {
         $this->client_id = (string) $client_id;
 
         return $this;
@@ -60,8 +57,7 @@ class Itau
      *
      * @return mixed
      */
-    public function getClientSecret()
-    {
+    public function getClientSecret() {
         return $this->client_secret;
     }
 
@@ -69,44 +65,37 @@ class Itau
      *
      * @param mixed $client_secret
      */
-    public function setClientSecret($client_secret)
-    {
+    public function setClientSecret($client_secret) {
         $this->client_secret = (string) $client_secret;
 
         return $this;
     }
 
-    public function getCertificate()
-    {
+    public function getCertificate() {
         return $this->certificate;
     }
 
-    public function setCertificate($certificate)
-    {
+    public function setCertificate($certificate) {
         $this->certificate = (string) $certificate;
 
         return $this;
     }
 
-    public function getCertificateKey()
-    {
+    public function getCertificateKey() {
         return $this->certificateKey;
     }
 
-    public function setCertificateKey($certificateKey)
-    {
+    public function setCertificateKey($certificateKey) {
         $this->certificateKey = (string) $certificateKey;
 
         return $this;
     }
 
-    public function getEnvironment(): Environment
-    {
+    public function getEnvironment(): Environment {
         return $this->environment;
     }
 
-    public function setEnvironment(Environment $environment): self
-    {
+    public function setEnvironment(Environment $environment): self {
         $this->environment = $environment;
 
         return $this;
@@ -116,8 +105,7 @@ class Itau
      *
      * @return mixed
      */
-    public function getAuthorizationToken()
-    {
+    public function getAuthorizationToken() {
         return $this->authorizationToken;
     }
 
@@ -125,8 +113,7 @@ class Itau
      *
      * @param mixed $authorizationToken
      */
-    public function setAuthorizationToken($authorizationToken)
-    {
+    public function setAuthorizationToken($authorizationToken) {
         $this->authorizationToken = (string) $authorizationToken;
 
         return $this;
@@ -136,8 +123,7 @@ class Itau
      *
      * @return bool|null
      */
-    public function getDebug()
-    {
+    public function getDebug() {
         return $this->debug;
     }
 
@@ -145,65 +131,59 @@ class Itau
      *
      * @param bool|null $debug
      */
-    public function setDebug($debug = false)
-    {
+    public function setDebug($debug = false) {
         $this->debug = $debug;
 
         return $this;
     }
 
-    public function pix(Pix $pix): PixResponse
-    {
+    public function pix(Pix $pix): PixResponse {
         $pixResponse = new PixResponse();
-        try{
+        try {
             if ($this->debug) {
                 print $pix->toJSON();
             }
 
             $request = new Request($this);
             $response = $request->post($this, "{$this->getEnvironment()->getApiPixUrl()}/cob", $pix->toJSON());
-           
-            
+
+
             // Add fields do not return in response
             $pixResponse->mapperJson($pix->toArray());
             // Add response fields
             $pixResponse->mapperJson($response);
             $pixResponse->setStatus(BaseResponse::STATUS_CONFIRMED);
             return $pixResponse;
-
         } catch (\Exception $e) {
             return $this->generateErrorResponse($pixResponse, $e);
         }
     }
 
-    public function boleCode(BoleCode $boleCode): BoleCodeResponse
-    {
+    public function boleCode(BoleCode $boleCode): BoleCodeResponse {
         $boleCodeResponse = new BoleCodeResponse();
-        try{
+        try {
             if ($this->debug) {
                 print $boleCode->toJSON();
             }
 
             $request = new Request($this);
             $response = $request->post($this, "{$this->getEnvironment()->getApiBoleCodeUrl()}/boletos_pix", $boleCode->toJSON());
-           
+
             // Add fields do not return in response
             $boleCodeResponse->mapperJson($boleCode->toArray());
             // Add response fields
             $boleCodeResponse->mapperJson($response);
             $boleCodeResponse->setStatus(BaseResponse::STATUS_CONFIRMED);
             return $boleCodeResponse;
-
         } catch (\Exception $e) {
             return $this->generateErrorResponse($boleCodeResponse, $e);
         }
     }
 
-    public function alterarVencimentoBoleto($agencia, $contaComDigito, $carteira, $nossoNumero, Vencimento $vencimento)
-    {
+    public function alterarVencimentoBoleto($agencia, $contaComDigito, $carteira, $nossoNumero, Vencimento $vencimento) {
         $boletoResponse = new BoletoResponse();
 
-        $path = str_pad($agencia, 4, '0', STR_PAD_LEFT).str_pad($contaComDigito, 8, '0', STR_PAD_LEFT).str_pad($carteira, 3, '0', STR_PAD_LEFT).str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
+        $path = str_pad($agencia, 4, '0', STR_PAD_LEFT) . str_pad($contaComDigito, 8, '0', STR_PAD_LEFT) . str_pad($carteira, 3, '0', STR_PAD_LEFT) . str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
         $request = new Request($this);
         $response = $request->patch($this, "{$this->getEnvironment()->getApiBoletoUrl()}/boletos/{$path}/data_vencimento", $vencimento->toJSON());
         $boletoResponse->mapperJson($response);
@@ -211,11 +191,10 @@ class Itau
         return $boletoResponse;
     }
 
-    public function alterarValorBoleto($agencia, $contaComDigito, $carteira, $nossoNumero, Valor $valor)
-    {
+    public function alterarValorBoleto($agencia, $contaComDigito, $carteira, $nossoNumero, Valor $valor) {
         $boletoResponse = new BoletoResponse();
 
-        $path = str_pad($agencia, 4, '0', STR_PAD_LEFT).str_pad($contaComDigito, 8, '0', STR_PAD_LEFT).str_pad($carteira, 3, '0', STR_PAD_LEFT).str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
+        $path = str_pad($agencia, 4, '0', STR_PAD_LEFT) . str_pad($contaComDigito, 8, '0', STR_PAD_LEFT) . str_pad($carteira, 3, '0', STR_PAD_LEFT) . str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
         $request = new Request($this);
         $response = $request->patch($this, "{$this->getEnvironment()->getApiBoletoUrl()}/boletos/{$path}/valor_nominal", $valor->toJSON());
         $boletoResponse->mapperJson($response);
@@ -223,11 +202,10 @@ class Itau
         return $boletoResponse;
     }
 
-    public function consultarBoleto($agencia, $contaComDigito, $nossoNumero, $carteira)
-    {
+    public function consultarBoleto($agencia, $contaComDigito, $nossoNumero, $carteira) {
         $boletoResponse = new BoletoResponse();
 
-        $id_beneficiario = str_pad($agencia, 4, '0', STR_PAD_LEFT).str_pad($contaComDigito, 8, '0', STR_PAD_LEFT);
+        $id_beneficiario = str_pad($agencia, 4, '0', STR_PAD_LEFT) . str_pad($contaComDigito, 8, '0', STR_PAD_LEFT);
         $nosso_numero = str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
         $request = new Request($this);
         $response = $request->get($this, "{$this->getEnvironment()->getApiBoletoConsultaUrl()}/boletos?id_beneficiario={$id_beneficiario}&codigo_carteira={$carteira}&nosso_numero={$nosso_numero}");
@@ -238,11 +216,10 @@ class Itau
         return $boletoResponse;
     }
 
-    public function baixarBoleto($agencia, $contaComDigito, $carteira, $nossoNumero)
-    {
+    public function baixarBoleto($agencia, $contaComDigito, $carteira, $nossoNumero) {
         $boletoResponse = new BoletoResponse();
 
-        $path = str_pad($agencia, 4, '0', STR_PAD_LEFT).str_pad($contaComDigito, 8, '0', STR_PAD_LEFT).str_pad($carteira, 3, '0', STR_PAD_LEFT).str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
+        $path = str_pad($agencia, 4, '0', STR_PAD_LEFT) . str_pad($contaComDigito, 8, '0', STR_PAD_LEFT) . str_pad($carteira, 3, '0', STR_PAD_LEFT) . str_pad($nossoNumero, 8, '0', STR_PAD_LEFT);
         $request = new Request($this);
         $response = $request->patch($this, "{$this->getEnvironment()->getApiBoletoUrl()}/boletos/{$path}/baixa", '{}');
         // Add response fields
@@ -251,15 +228,73 @@ class Itau
         return $boletoResponse;
     }
 
-    private function generateErrorResponse(BaseResponse $baseResponse, $e)
-    {
+    private function generateErrorResponse(BaseResponse $baseResponse, $e) {
+
         $baseResponse->mapperJson(json_decode($e->getMessage(), true));
-        
+
         if (empty($baseResponse->getStatus())) {
             $baseResponse->setStatus(BaseResponse::STATUS_ERROR);
         }
-        
+
         return $baseResponse;
+    }
+
+    public function cadastrarWebhookBoleto(
+        string $agencia,
+        string $conta,
+        string $digito_conta,
+        array $data
+    ) {
+        $responseWrapper = new BaseResponse();
+
+        try {
+            $id_beneficiario = self::idBeneficiario($agencia, $conta, $digito_conta);
+
+            $data['id_beneficiario'] =  $id_beneficiario;
+
+            $payload = json_encode(['data' => $data], JSON_UNESCAPED_UNICODE);
+
+            $url = "https://boletos.cloud.itau.com.br/boletos/v3/notificacoes_boletos";
+
+            $request = new Request($this);
+
+            $response = $request->post($this, $url, $payload);
+
+            $responseWrapper->mapperJson($response);
+            $responseWrapper->setStatus(BaseResponse::STATUS_CONFIRMED);
+
+            return $responseWrapper;
+        } catch (\Exception $e) {
+
+            $responseWrapper->mapperJson(['erro' => $e->getMessage()]);
+            $responseWrapper->setStatus(BaseResponse::STATUS_ERROR);
+            return $responseWrapper;
+        }
+    }
+
+
+    public function listarWebhooksBoletos(string $agencia, string $conta, string $digito_conta) {
+
+        $responseWrapper = new BaseResponse();
+
+        try {
+            $id_beneficiario = self::idBeneficiario($agencia, $conta, $digito_conta);
+
+            $url = "https://boletos.cloud.itau.com.br/boletos/v3/notificacoes_boletos?id_beneficiario={$id_beneficiario}";
+
+            $request = new Request($this);
+
+            $response = $request->get($this, $url);
+
+            $responseWrapper->mapperJson($response);
+            $responseWrapper->setStatus(BaseResponse::STATUS_CONFIRMED);
+
+            return $responseWrapper;
+        } catch (\Exception $e) {
+            $responseWrapper->mapperJson(['erro' => $e->getMessage()]);
+            $responseWrapper->setStatus(BaseResponse::STATUS_ERROR);
+            return $responseWrapper;
+        }
     }
 
     public function consultaBoletoPix($txtId) {
@@ -275,5 +310,9 @@ class Itau
         $boletoResponse->mapperJson($response);
 
         return $boletoResponse;
+    }
+
+    private final function idBeneficiario($agencia, $conta, $digito_conta) {
+        return str_pad($agencia, 4, '0', STR_PAD_LEFT) . str_pad($conta, 7, '0', STR_PAD_LEFT) . $digito_conta;
     }
 }
