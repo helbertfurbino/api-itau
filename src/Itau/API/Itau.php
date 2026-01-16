@@ -312,7 +312,7 @@ class Itau {
         return $boletoResponse;
     }
 
-    private final function idBeneficiario($agencia, $conta, $digito_conta) {
+    private function idBeneficiario($agencia, $conta, $digito_conta) {
         return str_pad($agencia, 4, '0', STR_PAD_LEFT) . str_pad($conta, 7, '0', STR_PAD_LEFT) . $digito_conta;
     }
 }
