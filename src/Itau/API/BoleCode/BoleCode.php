@@ -1,10 +1,10 @@
 <?php
+
 namespace Itau\API\BoleCode;
 
 use Itau\API\TraitEntity;
 
-class BoleCode implements \JsonSerializable
-{
+class BoleCode implements \JsonSerializable {
     use TraitEntity;
 
     const ETAPA_TESTE = "simulacao";
@@ -16,25 +16,53 @@ class BoleCode implements \JsonSerializable
     private DadosQrcode $dados_qrcode;
 
     public function __construct(
-        $modo, $agencia, $conta, $contaDV, $valor, $tipoBoleto, $numeroDocumento, $nome, $tipoPessoa,
-        $documento, $endereco, $numero, $complemento, $bairro, $cidade, $siglaEstado, $cep, $nossoNumero, 
-        $vencimento, $chavePix, $tipoMulta, $percentualMulta, $tipoJuros, $percentualJuros
-    )
-    {
+        $modo,
+        $agencia,
+        $conta,
+        $contaDV,
+        $valor,
+        $tipoBoleto,
+        $numeroDocumento,
+        $nome,
+        $tipoPessoa,
+        $documento,
+        $endereco,
+        $numero,
+        $complemento,
+        $bairro,
+        $cidade,
+        $siglaEstado,
+        $cep,
+        $nossoNumero,
+        $vencimento,
+        $chavePix,
+        $tipoMulta,
+        $percentualMulta,
+        $tipoJuros,
+        $percentualJuros,
+        $limitePagamento = null
+    ) {
         $this->setEtapaProcessoBoleto($modo)
-            ->beneficiario()->setIdBeneficiario($agencia, $conta.$contaDV);
-        $dadoBoleto = $this->dadoBoleto()
-            ->setDados($valor, $tipoBoleto, $numeroDocumento);
+            ->beneficiario()->setIdBeneficiario($agencia, $conta . $contaDV);
+        $dadoBoleto = $this->dadoBoleto()->setDados($valor, $tipoBoleto, $numeroDocumento);
         $pagador = $dadoBoleto->pagador();
         $pessoa = $pagador->pessoa()->setNomePessoa($nome);
-        $tipoPessoa = $pessoa->tipoPessoa()
-            ->setPessoa($tipoPessoa, $documento);
+        $tipoPessoa = $pessoa->tipoPessoa()->setPessoa($tipoPessoa, $documento);
         $pagador->endereco()->setEndereco(
-            $endereco, $numero, $complemento, $bairro, $cidade, $siglaEstado, $cep
+            $endereco,
+            $numero,
+            $complemento,
+            $bairro,
+            $cidade,
+            $siglaEstado,
+            $cep
         );
-            
+
         $dadoBoleto->dadosIndividuais()->setDados(
-            $nossoNumero, $vencimento, $valor
+            $nossoNumero,
+            $vencimento,
+            $valor,
+            $limitePagamento
         );
 
         $dadoBoleto->multa()->setMulta($tipoMulta, $percentualMulta);
@@ -42,14 +70,12 @@ class BoleCode implements \JsonSerializable
 
         $this->dadosQrCode()->setChave($chavePix);
     }
-    public function setEtapaProcessoBoleto($etapa): self
-    {
+    public function setEtapaProcessoBoleto($etapa): self {
         $this->etapa_processo_boleto = $etapa;
         return $this;
     }
 
-    public function beneficiario(): Beneficiario
-    {
+    public function beneficiario(): Beneficiario {
         $beneficiario = new Beneficiario();
 
         $this->setBeneficiario($beneficiario);
@@ -57,19 +83,16 @@ class BoleCode implements \JsonSerializable
         return $beneficiario;
     }
 
-    public function getBeneficiario(): Beneficiario
-    {
+    public function getBeneficiario(): Beneficiario {
         return $this->beneficiario;
     }
 
-    public function setBeneficiario(Beneficiario $beneficiario): self
-    {
+    public function setBeneficiario(Beneficiario $beneficiario): self {
         $this->beneficiario = $beneficiario;
         return $this;
     }
 
-    public function dadoBoleto(): DadoBoleto
-    {
+    public function dadoBoleto(): DadoBoleto {
         $dado = new DadoBoleto();
 
         $this->setDadoBoleto($dado);
@@ -77,14 +100,12 @@ class BoleCode implements \JsonSerializable
         return $dado;
     }
 
-    private function setDadoBoleto(DadoBoleto $dado): self
-    {
+    private function setDadoBoleto(DadoBoleto $dado): self {
         $this->dado_boleto = $dado;
         return $this;
     }
 
-    public function dadosQrCode(): DadosQrCode
-    {
+    public function dadosQrCode(): DadosQrCode {
         $dado = new DadosQrCode();
 
         $this->setDadosQrCode($dado);
@@ -92,8 +113,7 @@ class BoleCode implements \JsonSerializable
         return $dado;
     }
 
-    private function setDadosQrCode(DadosQrCode $dado): self
-    {
+    private function setDadosQrCode(DadosQrCode $dado): self {
         $this->dados_qrcode = $dado;
         return $this;
     }
